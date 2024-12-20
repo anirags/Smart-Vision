@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Test Case Optimization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: black;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .content {
+            flex: 2;
+        }
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        
+
+        .table-container{ 
+           width:55%
+        }
+        table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:20px;
+        box-shadow:0px 0px 10px rgba(0,0,0,0.1);
+         
+        }
+        th,td{ 
+        border:1px solid #ddd;
+        padding:8px;
+        text-align:center;
+        
+        }
+        th{ 
+        background-color:#f2f2f2;
+        color:#333;
+        
+        }
+        .category-Duplicate{ 
+            background-color:#E26310;
+       
+        }
+        
+        .category-Almost-Duplicate{ 
+            background-color:#F4914C;
+       
+        }
+        .category-Highly-Similar{ 
+            background-color:#FFBF00;
+       
+        }
+        .category-Moderate-Duplicate{ 
+            background-color:#FFAE42;
+       
+        }
+        .category-Almost-Unique{ 
+            background-color:#77dd77;
+       
+        }
+        .category-Unique{ 
+            background-color:#4CBB17;
+       
+        }
+        .category-Invalid-Data{ 
+            background-color:#808080;
+       
+        }
+        .hidden-table{ 
+            display:none;
+        }
+        .categoryalmosthide{ 
+            background-color:#f4a460;
+            color:white;
+            text-align:center;
+        
+        }
+        .category{ 
+            color:white;
+            text-align:center;
+            
+        }
+        .duplicate-steps{ 
+            white-space:pre-line;
+        }
+        .download-button:hover{ 
+            background-color:#2e3a50;
+        }
+        .download-button{ 
+        
+            display:inline-block;
+            background-color:#3E4A61;
+            color:white;
+            padding:10px 20px;
+            text-align:center;
+            text-decoration:none;
+            border-radius:5px;
+            cursor:pointer;
+            transition:background-color 0.3s;
+            margin: 20px auto;
+            text-align : center;
+        
+        }
+        .upload-button, .submit-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px 0;
+        }
+        .upload-button:hover, .submit-button:hover {
+            background-color: #2e3a50;
+        }
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .showmessage {
+            margin-top: 10px;
+            font-weight: bold;
+            color: green;
+            text-align: center;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+         @keyframes spin {
+             0% { transform: rotate(0deg); }
+             100% { transform: rotate(360deg); }
+         }
+         .error_message{ 
+             color:red;
+             margin-top:10px;
+             display:none;
+             text-align:center
+         
+         }
+        .toaster {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #00AD83;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 30px;
+            font-size: 17px;
+        }
+
+        .toaster.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {top: 0; opacity: 0;}
+            to {top: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {top: 0; opacity: 0;}
+            to {top: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {top: 30px; opacity: 1;}
+            to {top: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {top: 30px; opacity: 1;}
+            to {top: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <!-- <img src={{url_for('static',filename='/images/nv.jpg')}} width="80" height="30" alt="Upload Image" style="margin-bottom: 20px;"> -->
+    <img src={{url_for('static',filename='/images/nvsoftware.png')}} width="90" height="60" alt="Upload Image" style="margin-bottom: 20px;">
+
+    <!-- <img src={{url_for('static',filename='/images/image.jpg')}} width="80" height="30" alt="Upload Image" style="margin-bottom: 20px; float:right;"> -->
+    
+    <h1 style="line-height: 18px; letter-spacing: -2px;">SmartVision</h1>
+    <h6 style="text-align: center; color: black; margin: 4px;">An AI-Assistant For Test Suite Optimization</h6>
+    
+    <div id="toaster" class="toaster">Dashboard is Ready!</div>
+    
+    <div>
+        <div>
+            <form method="POST" enctype="multipart/form-data" id="uploadForm" style="text-align: center;">
+                <label class="upload-button" style="position:relative;">
+                    Upload Test Suite
+                    <input type="file" name="file" id="fileInput" accept=".csv,.xlsx" style="display:none;" onchange="showFileName()">
+                </label>
+                <button type="button" id="submitButton" class="submit-button" style="border:none; padding:11px 22px; font-size:15px;">Submit</button>
+                <br>
+                <span id="fileName" class="showmessage" style="display:block; margin-top:10px; font-size:14px; color:green;"></span>
+                <div id="errorMessage" style="color:red; margin-top:10px;"></div>
+            </form>
+            <div id="message" class="message"></div>
+            <div>
+                <div id="error_message" class="error_message"></div>
+            </div>
+        </div>
+    </div>
+    <!---------------------------------------------------------->
+    <div class="container">
+         <!----------------------------------------->
+         <div style="flex:1;padding:20px;border:1px solid #000;margin:0;width:35%; text-align:center;">
+            <p style="text-align:center">Test Suite Optimization Analysis</p>
+            <div class="chart-container">
+                <!-- Display the Pie Chart -->
+                <img src="data:image/png;base64,{{ pie_chart }}" alt="Pie Chart" style="max-width: 100%; height: auto;">
+               
+            </div>
+        
+        </div>
+         <!----------------------------------------->
+         <!----------------------------------------->
+         <div class="table-container" style="flex:1;padding:20px;border:1px solid #000;margin:0;">
+         <p style="text-align:center">Test Suite Optimiation Summary</p>
+         <table>
+             <thead>
+                 <tr>
+                     <th style="color:#000000">Category</th>
+                     <th style="color:#000000">Test Case Similarity</th>
+                     <th style="color:#000000">Test Cases</th>
+                     <th style="color:#000000">Recommended Action</th>
+                     <th style="color:#000000">Download</th>
+                 </tr>
+             </thead>
+             <tbody>
+             {% for index, row in final_output_df.iterrows() %}
+                 <tr class="category-{{row.Category|replace(' ','-')}}" onclick="showDetails({{row.cat_no }})" style="cursor:pointer;">
+                     <td>{{ row['Category']}}</td>
+                     <td>{{ row['Similarity_Percentage']}}</td>
+                     <td>{{ row['Test_Cases_Count']}}</td>
+                     <td>{{ row['Recommendation']}}</td>
+                     <td>
+                        <a href="{{url_for('excel_file_download',category=row.Category|replace(' ','_'))}}" > 
+                            <img  src={{url_for('static',filename='/images/download.png')}}  width="20" height="20"  alt="Download Image"  > 
+                        </a>
+                        
+                    </td>
+                  </tr>
+                  {% endfor %}
+             </tbody>
+             <tfoot>
+                 <tr>
+                    <td colspan="2" style="color:#000000; text-align: center;"><strong>Total Test Cases</strong></td>
+                    <td style="text-align: center;"><strong>{{ total_test_case_count }}</strong></td>
+                    <td colspan="2"> </td>
+                </tr>
+             </tfoot>
+         </table>
+         </div>
+    </div>
+         <!----------------------------------------->
+         <!--------------------DUPLICATE START--------------------->
+         <div id="details-0" class="hidden-table" style="display:none;margin-top:20px ;align:right;">
+         <h2><span style="color:#E23610">Duplicate</span>:Model Test Cases</h2>
+         <table>
+             <thead style="background-color:#f2f2f2;">
+                 <tr>
+                     <th> Category</th>
+                     <th> Test Case ID</th>
+                     <th> Duplicate Test Case IDs</th>
+                     <th> Reoccurences Detected</th>
+                    
+                 </tr>
+             </thead>
+             <tbody>
+                 {%  if not duplicate_data_summary.empty %}
+                 <tr> 
+                     <td class="category" style="background-color:#E23610;" rowspan="{{duplicate_data_summary | length}}">Duplicate</td>
+                     <td>{{ duplicate_data_summary.iloc[0]['TC_ID1'] }}</td>
+                     <td>{{ duplicate_data_summary.iloc[0]['DuplicateIds']|safe }}</td>
+                     <td>{{ duplicate_data_summary.iloc[0]['count'] }}</td>
+                 </tr>
+                 
+                 {% for index,duplicate in duplicate_data_summary[1:].iterrows() %}
+                 <tr>
+                     <td>{{ duplicate['TC_ID1'] }}</td>
+                     <td>{{ duplicate['DuplicateIds'] |safe }}</td>
+                     <td>{{ duplicate['count'] }}</td>
+                 </tr>
+                 {% endfor %}
+             {% endif %}
+                 
+             </tbody>
+         </table>
+         
+         </div>
+         <!------------------DUPLICATE END----------------------->
+          <!--------------------ALMOST DUPLICATE START--------------------->
+          <div id="details-1" class="hidden-table" style="display:none;margin-top:20px;align:right;">
+          <h2><span style="color:#F4914C">Almost Duplicate</span>:Model Test Cases</h2>
+          <table>
+              <thead style="background-color:#f2f2f2;">
+                  <tr>
+                      <th> Category</th>
+                      <th> Test Case ID</th>
+                      <th> Duplicate Test Case IDs</th>
+                      <th> Reoccurences Detected</th>
+                     
+                  </tr>
+              </thead>
+              <tbody>
+                  {%  if not almost_duplicate_summary.empty %}
+                  <tr> 
+                      <td class="category" style="background-color:#F4914C;" rowspan="{{almost_duplicate_summary | length}}">Almost Duplicate</td>
+                      <td>{{ almost_duplicate_summary.iloc[0]['TC_ID1'] }}</td>
+                      <td>{{ almost_duplicate_summary.iloc[0]['DuplicateIds']|safe }}</td>
+                      <td>{{ almost_duplicate_summary.iloc[0]['count'] }}</td>
+                  </tr>
+                  
+                  {% for index,almost_duplicate in almost_duplicate_summary[1:].iterrows() %}
+                  <tr>
+                      <td>{{ almost_duplicate['TC_ID1'] }}</td>
+                      <td>{{ almost_duplicate['DuplicateIds'] |safe}}</td>
+                      <td>{{ almost_duplicate['count'] }}</td>
+                  </tr>
+                  {% endfor %}
+              {% endif %}
+                  
+              </tbody>
+          </table>
+          
+          </div>
+          <!------------------ALMOST DUPLICATE END----------------------->
+          <!--------------------HIGHLY SIMILAR START--------------------->
+          <div id="details-2" class="hidden-table" style="display:none;margin-top:20px; align:right;">
+          <h2><span style="color:#FFBF00">Highly Similar</span>:Model Test Cases</h2>
+          <table>
+              <thead style="background-color:#f2f2f2;">
+                  <tr>
+                      <th> Category</th>
+                      <th> Test Case ID</th>
+                      <th> Duplicate Test Case IDs</th>
+                      <th> Reoccurences Detected</th>
+                     
+                  </tr>
+              </thead>
+              <tbody>
+                  {%  if not highlysimilar_summary.empty %}
+                  <tr> 
+                      <td class="category" style="background-color:#FFBF00;" rowspan="{{highlysimilar_summary | length}}">Highly Similar</td>
+                      <td>{{ highlysimilar_summary.iloc[0]['TC_ID1'] }}</td>
+                      <td>{{ highlysimilar_summary.iloc[0]['DuplicateIds']|safe }}</td>
+                      <td>{{ highlysimilar_summary.iloc[0]['count'] }}</td>
+                  </tr>
+                  
+                  {% for index,highlysimilar in highlysimilar_summary[1:].iterrows() %}
+                  <tr>
+                      <td>{{ highlysimilar['TC_ID1'] }}</td>
+                      <td>{{ highlysimilar['DuplicateIds'] |safe }}</td>
+                      <td>{{ highlysimilar['count'] }}</td>
+                  </tr>
+                  {% endfor %}
+              {% endif %}
+                  
+              </tbody>
+          </table>
+          
+          </div>
+          <!------------------HIGHLY SIMILAR END----------------------->
+          <!--------------------MODERATE DUPLICATE START--------------------->
+          <div id="details-3" class="hidden-table" style="display:none;margin-top:20px;align:right;">
+          <h2><span style="color:#FFAE42">Moderate Duplicate</span>:Model Test Cases</h2>
+          <table>
+              <thead style="background-color:#f2f2f2;">
+                  <tr>
+                      <th> Category</th>
+                      <th> Test Case ID</th>
+                      <th> Duplicate Test Case IDs</th>
+                      <th> Reoccurences Detected</th>
+                     
+                  </tr>
+              </thead>
+             
+               <tbody>
+                   {%  if not moderate_duplicate_summary.empty %}
+                   <tr> 
+                       <td class="category" style="background-color:#FFAE42;" rowspan="{{moderate_duplicate_summary | length}}">Moderate Duplicate</td>
+                       <td>{{ moderate_duplicate_summary.iloc[0]['TC_ID1'] }}</td>
+                       <td>{{ moderate_duplicate_summary.iloc[0]['DuplicateIds']|safe }}</td>
+                       <td>{{ moderate_duplicate_summary.iloc[0]['count'] }}</td>
+                   </tr>
+                   
+                   {% for index,moderate in moderate_duplicate_summary[1:].iterrows() %}
+                   <tr>
+                       <td>{{ moderate['TC_ID1'] }}</td>
+                       <td>{{ moderate['DuplicateIds'] |safe }}</td>
+                       <td>{{ moderate['count'] }}</td>
+                   </tr>
+                   {% endfor %}
+               {% endif %}
+                   
+               </tbody>
+          </table>
+          
+          </div>
+          <!------------------MODERATE DUPLICATE END----------------------->
+           <!--------------------ALMOST UNIQUE START--------------------->
+           <div id="details-4" class="hidden-table" style="display:none;margin-top:20px align:right;">
+           <h2><span style="color:#77dd77">Almost Unique</span>:Model Test Cases</h2>
+           <table>
+               <thead style="background-color:#f2f2f2;">
+                   <tr>
+                       <th> Category</th>
+                       <th> Test Case ID</th>
+                       <th> Duplicate Test Case IDs</th>
+                       <th> Reoccurences Detected</th>
+                      
+                   </tr>
+               </thead>
+               <tbody>
+                   {%  if not almost_unique_summary.empty %}
+                   <tr> 
+                       <td class="category" style="background-color:#77dd77;" rowspan="{{almost_unique_summary | length}}">Almost Unique</td>
+                       <td>{{ almost_unique_summary.iloc[0]['TC_ID1'] }}</td>
+                       <td>{{ almost_unique_summary.iloc[0]['DuplicateIds']|safe }}</td>
+                       <td>{{ almost_unique_summary.iloc[0]['count'] }}</td>
+                   </tr>
+                   
+                   {% for index,almostunique in almost_unique_summary[1:].iterrows() %}
+                   <tr>
+                       <td>{{ almostunique['TC_ID1'] }}</td>
+                       <td>{{ almostunique['DuplicateIds'] |safe }}</td>
+                       <td>{{ almostunique['count'] }}</td>
+                   </tr>
+                   {% endfor %}
+               {% endif %}
+                   
+               </tbody>
+           </table>
+           
+           </div>
+           <!------------------ALMOST UNIQUE END----------------------->
+           <!-------------------- UNIQUE START--------------------->
+           <div id="details-5" class="hidden-table" style="display:none;margin-top:20px align:right;">
+           <h2><span style="color:#4CBB17"> Unique</span>:Model Test Cases</h2>
+           <table>
+               <thead style="background-color:#f2f2f2;">
+                   <tr>
+                       <th> Category</th>
+                       <th> Test Case ID</th>
+                       <th> Duplicate Test Case IDs</th>
+                       <th> Reoccurences Detected</th>
+                      
+                   </tr>
+               </thead>
+               <tbody>
+                   {%  if not unique_summary.empty %}
+                   <tr> 
+                       <td class="category" style="background-color:#4CBB17;" rowspan="{{unique_summary | length}}">Unique</td>
+                       <td>{{ unique_summary.iloc[0]['TC_ID'] }}</td>
+                       <td>-</td>
+                       <td>0</td>
+                   </tr>
+                   
+                   {% for index,unique in unique_summary[1:].iterrows() %}
+                   <tr>
+                       <td>{{ unique['TC_ID'] }}</td>
+                       <td>-</td>
+                       <td>0</td>
+                   </tr>
+                   {% endfor %}
+               {% endif %}
+                   
+               </tbody>
+           </table>
+           
+           </div>
+           <!------------------ UNIQUE END----------------------->
+           <!-------------------- INVALID DATA START--------------------->
+           <div id="details-6" class="hidden-table" style="display:none;margin-top:20px align:right;">
+           <h2><span style="color:#808080">Invalid</span>:Model Test Cases</h2>
+           <table>
+               <thead style="background-color:#f2f2f2;">
+                   <tr>
+                       <th> Category</th>
+                       <th> Test Case ID</th>
+                       <th> Duplicate Test Case IDs</th>
+                       <th> Reoccurences Detected</th>
+                      
+                   </tr>
+               </thead>
+               <tbody>
+                   {%  if not invalid_summary.empty %}
+                   <tr> 
+                       <td class="category" style="background-color:#808080;" rowspan="{{invalid_summary | length}}">Invalid Data</td>
+                       <td>{{ invalid_summary.iloc[0]['ID'] }}</td>
+                        <td>-</td>
+                        <td>0</td>
+                   </tr>
+                   
+                   {% for index,invalid in invalid_summary[1:].iterrows() %}
+                   <tr>
+                       <td>{{ invalid['ID'] }}</td>
+                       <td>-</td>
+                       <td>0</td>
+                   </tr>
+                   {% endfor %}
+               {% endif %}
+                   
+               </tbody>
+           </table>
+           
+           </div>
+           <!------------------INVALID DATA  END----------------------->
+           
+    
+    <!---------------------------------------------------------->
+    
+    <div class="overlay" id="overlay">
+        <div class="loader"></div>
+    </div>
+    <!-- ------------------Scripts------------------- -->
+    
+    <script>
+        function showFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileNameDisplay = document.getElementById('fileName');
+            const errorMessage = document.getElementById('errorMessage');
+    
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `Selected File: ${fileInput.files[0].name}`;
+                errorMessage.textContent = ""; // Clear any previous error message
+            }
+        }
+    
+        document.getElementById('submitButton').addEventListener('click', function() {
+            const fileInput = document.getElementById('fileInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const overlay = document.getElementById('overlay');
+    
+            if (fileInput.files.length === 0) {
+                errorMessage.textContent = "Please choose an input file before submitting.";
+                overlay.style.display = "none";
+            } else {
+                errorMessage.textContent = ""; // Clear any error messages
+                overlay.style.display = "flex"; // Show the loading overlay
+                document.getElementById('uploadForm').submit(); // Submit the form
+            }
+        });
+    
+        function showDetails(detailId) {
+            const detailTables = document.querySelectorAll('.hidden-table');
+            detailTables.forEach(table => table.style.display = 'none');
+    
+            const detailTable = document.getElementById('details-' + detailId);
+            if(detailTable){ 
+                detailTable.style.display = 'block';
+            }
+        }
+    
+        // Assuming execution_done is passed correctly from the server-side
+        const executionDone = {{ execution_done | default(false) | tojson }};
+        
+        if (executionDone) {
+            const toaster = document.getElementById('toaster');
+            toaster.classList.add("show");
+    
+            setTimeout(() => {
+                toaster.classList.remove("show");
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
